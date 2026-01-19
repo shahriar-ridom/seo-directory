@@ -1,4 +1,4 @@
-import { text } from "drizzle-orm/pg-core";
+import { jsonb, text } from "drizzle-orm/pg-core";
 import { index } from "drizzle-orm/pg-core";
 import { integer } from "drizzle-orm/pg-core";
 import { serial } from "drizzle-orm/pg-core";
@@ -19,7 +19,7 @@ export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
-  templateData: text("template_data"),
+  templateData: jsonb("template_data"),
 });
 
 // Listing (The Content)
