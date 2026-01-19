@@ -33,7 +33,7 @@ Follow these steps to get the project up and running locally.
 1. **Clone the repository**
 
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/shahriar-ridom/seo-directory.git
    cd seo-directory
    ```
 
