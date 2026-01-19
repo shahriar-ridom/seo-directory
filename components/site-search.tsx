@@ -113,7 +113,7 @@ export function SiteSearch({ defaultCitySlug }: { defaultCitySlug: string }) {
             results.categories.length === 0 && (
               <div className="p-8 text-center">
                 <p className="text-slate-400 text-sm">
-                  No results found for "{query}"
+                  No results found for &quot;{query}&quot;
                 </p>
               </div>
             )}
