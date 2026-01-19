@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, MapPin, Tag, Loader2 } from "lucide-react";
+import { Search, MapPin, Tag, Loader2, ChevronRight } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 
 type SearchResult = {
@@ -14,7 +14,10 @@ export function SiteSearch({ defaultCitySlug }: { defaultCitySlug: string }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
 
-  const [results, setResults] = useState<SearchResult>({ locations: [], categories: [] });
+  const [results, setResults] = useState<SearchResult>({
+    locations: [],
+    categories: [],
+  });
 
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -44,7 +47,9 @@ export function SiteSearch({ defaultCitySlug }: { defaultCitySlug: string }) {
 
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`);
+        const res = await fetch(
+          `/api/search?q=${encodeURIComponent(debouncedQuery)}`,
+        );
         if (!res.ok) throw new Error("Search failed");
 
         const data = await res.json();
@@ -73,14 +78,22 @@ export function SiteSearch({ defaultCitySlug }: { defaultCitySlug: string }) {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-lg mx-auto">
-      <div className="relative">
+    <div ref={containerRef} className="w-full relative">
+      <div className="relative flex items-center">
+        <div className="absolute left-4 text-slate-400 pointer-events-none">
+          {isLoading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-teal-600" />
+          ) : (
+            <Search className="h-5 w-5" />
+          )}
+        </div>
+
         <input
           type="text"
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            if(e.target.value.length === 0) setIsOpen(false);
+            if (e.target.value.length === 0) setIsOpen(false);
           }}
           onFocus={() => {
             if (results.locations.length > 0 || results.categories.length > 0) {
@@ -88,45 +101,47 @@ export function SiteSearch({ defaultCitySlug }: { defaultCitySlug: string }) {
             }
           }}
           placeholder="Search for a city or category..."
-          className="w-full pl-12 pr-4 py-4 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg transition-all"
+          className="w-full bg-transparent border-none focus:ring-0 pl-12 pr-4 py-3 md:py-4 text-base md:text-lg text-slate-900 placeholder:text-slate-400 outline-none font-medium h-full"
         />
-
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">
-            {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-                <Search className="h-5 w-5" />
-            )}
-        </div>
       </div>
 
-      {/* DROPDOWN RESULTS */}
       {isOpen && query.length >= 2 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-xl overflow-hidden z-50">
-
+        <div className="absolute top-full left-0 right-0 mt-4 bg-white rounded-3xl border border-slate-100 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           {/* No Results State */}
-          {!isLoading && results.locations.length === 0 && results.categories.length === 0 && (
-              <div className="p-4 text-center text-zinc-500">
-                No results found.
+          {!isLoading &&
+            results.locations.length === 0 &&
+            results.categories.length === 0 && (
+              <div className="p-8 text-center">
+                <p className="text-slate-400 text-sm">
+                  No results found for "{query}"
+                </p>
               </div>
             )}
 
           {/* Locations Section */}
           {results.locations.length > 0 && (
             <div className="py-2">
-              <div className="px-4 py-1 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Locations
+              <div className="px-6 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                Cities
               </div>
               {results.locations.map((loc) => (
                 <button
                   key={loc.slug}
                   onClick={() => handleSelect("location", loc.slug)}
-                  className="w-full text-left px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 flex items-center gap-3 transition-colors"
+                  className="group w-full text-left px-6 py-3.5 hover:bg-teal-50/50 flex items-center gap-4 transition-all duration-200"
                 >
-                  <MapPin className="h-4 w-4 text-blue-500" />
-                  <span className="text-zinc-700 dark:text-zinc-200">
-                    {loc.name}, <span className="text-zinc-500">{loc.state}</span>
-                  </span>
+                  <div className="w-8 h-8 rounded-full bg-teal-100/50 flex items-center justify-center group-hover:bg-teal-500 group-hover:text-white transition-colors text-teal-600">
+                    <MapPin className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1">
+                    <span className="block text-slate-700 font-semibold group-hover:text-teal-900">
+                      {loc.name}
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium group-hover:text-teal-600/70">
+                      {loc.state}
+                    </span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-teal-400 group-hover:translate-x-1 transition-all" />
                 </button>
               ))}
             </div>
@@ -134,20 +149,23 @@ export function SiteSearch({ defaultCitySlug }: { defaultCitySlug: string }) {
 
           {/* Categories Section */}
           {results.categories.length > 0 && (
-            <div className="py-2 border-t border-zinc-100 dark:border-zinc-800">
-              <div className="px-4 py-1 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-                Categories
+            <div className="py-2 border-t border-slate-100 relative">
+              <div className="px-6 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2">
+                Services
               </div>
               {results.categories.map((cat) => (
                 <button
                   key={cat.slug}
                   onClick={() => handleSelect("category", cat.slug)}
-                  className="w-full text-left px-4 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 flex items-center gap-3 transition-colors"
+                  className="group w-full text-left px-6 py-3.5 hover:bg-amber-50/50 flex items-center gap-4 transition-all duration-200"
                 >
-                  <Tag className="h-4 w-4 text-green-500" />
-                  <span className="text-zinc-700 dark:text-zinc-200">
+                  <div className="w-8 h-8 rounded-full bg-amber-100/50 flex items-center justify-center group-hover:bg-amber-400 group-hover:text-white transition-colors text-amber-500">
+                    <Tag className="h-4 w-4" />
+                  </div>
+                  <span className="flex-1 text-slate-700 font-semibold group-hover:text-amber-900">
                     {cat.name}
                   </span>
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
                 </button>
               ))}
             </div>
