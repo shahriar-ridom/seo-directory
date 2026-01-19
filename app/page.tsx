@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { db } from "@/db";
 import { locations, categories } from "@/db/schema";
+import { SiteSearch } from "@/components/site-search";
 
 export default async function Home() {
   //Asynchronously Fetch Data
-  const [allCategories, topLocations] = await Promise.all([
+  const [allCategories, allLocations] = await Promise.all([
     db
       .select({
         id: categories.id,
@@ -19,10 +20,10 @@ export default async function Home() {
         slug: locations.slug,
         state: locations.state,
       })
-      .from(locations)
-      .limit(12),
+      .from(locations),
   ]);
 
+  const topLocations = allLocations.slice(0, 12);
   //Need to add GEO Location to find user's location and default it to that City
   const defaultCity = topLocations[0];
 
@@ -42,15 +43,13 @@ export default async function Home() {
             and more.
           </p>
 
-          <div className="relative max-w-lg mx-auto mt-8">
-            <input
-              type="text"
-              placeholder="What are you looking for?"
-              className="w-full px-6 py-4 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+          {/* Search Component */}
+          <div className="mt-8">
+            <SiteSearch
+              locations={allLocations}
+              categories={allCategories}
+              defaultCitySlug={defaultCity.slug}
             />
-            <button className="absolute right-2 top-2 px-6 py-2 bg-blue-600 text-white font-medium rounded-full hover:bg-blue-700 transition-colors">
-              Search
-            </button>
           </div>
         </div>
       </section>
