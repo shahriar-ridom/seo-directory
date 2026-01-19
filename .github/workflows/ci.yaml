@@ -11,20 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: 🔍 Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
+          cache: "pnpm"
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: 📦 Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Check Linting
-        run: npm run lint
+      - name: 🧹 Check Linting
+        run: pnpm run lint
 
-      - name: Type Check
-        run: npx tsc --noEmit
+      - name: 🛡️ Type Check
+        run: pnpm dlx tsc --noEmit
