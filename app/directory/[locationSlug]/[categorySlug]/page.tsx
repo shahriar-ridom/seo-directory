@@ -64,9 +64,9 @@ export default async function ProgrammaticPage({
       category.templateData &&
       typeof category.templateData === "object"
     ) {
-      // @ts-ignore
+      // @ts-expect-error
       if (category.templateData.heroText)
-        // @ts-ignore
+        // @ts-expect-error
         heroText = category.templateData.heroText;
     }
   } catch (e) {
