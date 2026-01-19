@@ -64,9 +64,9 @@ export default async function ProgrammaticPage({
       category.templateData &&
       typeof category.templateData === "object"
     ) {
-      // @ts-expect-error
+      // @ts-expect-error   This is an Error for no reason. Typescript can be weird Sometimes.
       if (category.templateData.heroText)
-        // @ts-expect-error
+        // @ts-expect-error  Same thing here.
         heroText = category.templateData.heroText;
     }
   } catch (e) {
