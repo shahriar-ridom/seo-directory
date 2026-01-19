@@ -33,4 +33,4 @@ jobs:
         run: pnpm run lint
 
       - name: 🛡️ Type Check
-        run: pnpm dlx tsc --noEmit
+        run: pnpm exec tsc --noEmit
