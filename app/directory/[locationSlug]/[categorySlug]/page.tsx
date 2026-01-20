@@ -58,19 +58,19 @@ async function DirectoryHero({
   heroText = heroText.replace("{city}", location.name);
 
   return (
-    <section className="relative pt-32 pb-32 px-6 bg-[#0c3937] z-30 overflow-hidden">
-      <div className="absolute top-[-50%] right-[-10%] w-125 h-125 rounded-full bg-teal-500/20 blur-[120px] pointer-events-none" />
+    <section className="relative pt-32 pb-24 px-6 bg-[#0c3937] z-30 overflow-hidden flex flex-col items-center justify-center min-h-[50vh]">
+      <div className="absolute top-[-50%] right-[-10%] w-125 h-125 rounded-full bg-teal-500/10 blur-[120px] pointer-events-none" />
 
       <div className="relative z-30 max-w-5xl mx-auto text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 backdrop-blur-md text-teal-100 text-sm">
-          <Link href="/" className="hover:text-white">
+          <Link href="/" className="hover:text-white transition-colors">
             Home
           </Link>
           <span className="text-white/30">/</span>
           <span className="text-amber-300 capitalize">{category.name}</span>
         </div>
 
-        <h1 className="text-4xl md:text-6xl font-extrabold text-white">
+        <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight">
           {heroText}
         </h1>
 
@@ -81,10 +81,11 @@ async function DirectoryHero({
         </p>
       </div>
 
-      <div className="absolute bottom-0 left-0 w-full leading-none z-20">
+      <div className="absolute bottom-0 left-0 w-full z-20 overflow-hidden leading-0">
         <svg
           viewBox="0 0 1440 320"
-          className="w-full h-16 md:h-24 fill-slate-50 opacity-100 block"
+          className="relative block w-full h-15 md:h-30 fill-slate-50 opacity-100"
+          preserveAspectRatio="none"
         >
           <path d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,202.7C1248,181,1344,171,1392,165.3L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
         </svg>
