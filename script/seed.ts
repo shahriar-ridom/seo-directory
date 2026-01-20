@@ -1,125 +1,153 @@
-import { config } from "dotenv";
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
-import { faker } from "@faker-js/faker";
-import * as schema from "@/db/schema";
+import "dotenv/config";
+import { db } from "@/db";
 import { locations, categories, listings } from "@/db/schema";
+import { faker } from "@faker-js/faker";
+import { sql } from "drizzle-orm";
 
-// Load environment variables from .env
-config({ path: ".env" });
+async function main() {
+  console.log("🌱 Starting 1M Row Seed...");
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is missing in .env");
-}
-
-const sql = neon(process.env.DATABASE_URL);
-const db = drizzle(sql, { schema });
-
-const SEED_CONFIG = {
-  LOCATIONS: 20,
-  CATEGORIES: 10,
-  LISTINGS: 1000,
-};
-
-async function seed() {
-  console.log("🌱 Starting Seed Process...");
-  console.log(
-    `Target: ${SEED_CONFIG.LOCATIONS} Locations, ${SEED_CONFIG.CATEGORIES} Categories, ${SEED_CONFIG.LISTINGS} Listings.`,
+  // 1. Clean Slate
+  console.log("🧹 Clearing DB...");
+  await db.execute(
+    sql`TRUNCATE TABLE ${listings}, ${locations}, ${categories} RESTART IDENTITY CASCADE`,
   );
 
-  try {
-    // 1. CLEANUP
-    console.log("Cleaning existing data...");
-    await db.delete(listings);
-    await db.delete(categories);
-    await db.delete(locations);
-    console.log("Tables cleaned.");
+  // 2. Setup Reference Data
+  // We need more than 10 cities for 1M rows, or your pages will be massive.
+  // Let's generate 50 realistic cities.
+  console.log("📍 Generating Locations & Categories...");
 
-    // 2. SEED LOCATIONS
-    console.log("Generating Locations...");
-    const locationData: (typeof locations.$inferInsert)[] = [];
+  const createdLocations: { id: number; slug: string }[] = [];
+  const createdCategories: { id: number; slug: string }[] = [];
 
-    for (let i = 0; i < SEED_CONFIG.LOCATIONS; i++) {
-      const city = faker.location.city();
-      const state = faker.location.state();
-      const slug = `${city.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${state.toLowerCase().slice(0, 2)}-${faker.string.alpha(3)}`;
+  // --- Locations ---
+  const locationsData = [];
+  // Hardcoded + Random mix
+  const BASE_CITIES = [
+    "Austin",
+    "New York",
+    "San Francisco",
+    "Chicago",
+    "Miami",
+  ];
 
-      locationData.push({
-        name: city,
-        state: state,
-        slug: slug,
-        metaTitle: `Best Services in ${city}, ${state}`,
-        metaDescription: `Find top-rated businesses in ${city}, ${state}.`,
-      });
-    }
+  for (let i = 0; i < 50; i++) {
+    const city =
+      i < BASE_CITIES.length ? BASE_CITIES[i] : faker.location.city();
+    // Ensure unique slug if faker duplicates a city name
+    const slug = faker.helpers
+      .slugify(`${city}-${faker.string.alpha(3)}`)
+      .toLowerCase();
 
-    const insertedLocations = await db
-      .insert(locations)
-      .values(locationData)
-      .returning({ id: locations.id });
-    console.log(`Seeded ${insertedLocations.length} locations.`);
-
-    // 3. SEED CATEGORIES
-    console.log("Generating Categories...");
-    const categoryNames = [
-      "Coffee Shops",
-      "Gyms",
-      "Coworking Spaces",
-      "Yoga Studios",
-      "Mechanics",
-      "Plumbers",
-      "Dentists",
-      "Barbershops",
-      "Pet Groomers",
-      "Vegan Restaurants",
-    ];
-
-    const categoryData = categoryNames.map((name) => ({
-      name: name,
-      slug: name.toLowerCase().replace(/[^a-z0-9]/g, "-"),
-      templateData: { heroText: `Find the best ${name} in town` },
-    }));
-
-    const insertedCategories = await db
-      .insert(categories)
-      .values(categoryData)
-      .returning({ id: categories.id });
-    console.log(`✅ Seeded ${insertedCategories.length} categories.`);
-
-    // 4. SEED LISTINGS
-    console.log("Generating Listings...");
-    const listingData: (typeof listings.$inferInsert)[] = [];
-
-    for (let i = 0; i < SEED_CONFIG.LISTINGS; i++) {
-      const randomLocation = faker.helpers.arrayElement(insertedLocations);
-      const randomCategory = faker.helpers.arrayElement(insertedCategories);
-      const name = faker.company.name();
-
-      listingData.push({
-        name: name,
-        slug: `${name.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${faker.string.alpha(4)}`,
-        description: faker.lorem.paragraph(),
-        websiteUrl: faker.internet.url(),
-        rating: faker.number.int({ min: 1, max: 5 }),
-        locationId: randomLocation.id,
-        categoryId: randomCategory.id,
-      });
-    }
-
-    const batchSize = 100;
-    for (let i = 0; i < listingData.length; i += batchSize) {
-      const batch = listingData.slice(i, i + batchSize);
-      await db.insert(listings).values(batch);
-      process.stdout.write(".");
-    }
-
-    console.log(`Seeded ${listingData.length} listings.`);
-
-    console.log("Seeding Complete! Go build something awesome.");
-  } catch (error) {
-    console.error("Seeding Failed:", error);
-    process.exit(1);
+    locationsData.push({
+      name: city,
+      slug: slug,
+      state: "US",
+      metaTitle: `Best Services in ${city}`,
+      metaDescription: `Find top rated services in ${city}`,
+    });
   }
+
+  // Bulk insert locations and return IDs + Slugs (Crucial for denormalization)
+  const locs = await db.insert(locations).values(locationsData).returning({
+    id: locations.id,
+    slug: locations.slug,
+  });
+  createdLocations.push(...locs);
+
+  // --- Categories ---
+  const SERVICES = [
+    "Coffee Shop",
+    "Gym",
+    "Plumber",
+    "Dentist",
+    "Lawyer",
+    "Bakery",
+    "Mechanic",
+    "Florist",
+    "Barber",
+    "Yoga Studio",
+    "Electrician",
+    "HVAC",
+    "Landscaper",
+    "Painter",
+    "Roofer",
+  ];
+
+  const categoriesData = SERVICES.map((service) => ({
+    name: service,
+    slug: faker.helpers.slugify(service).toLowerCase(),
+    templateData: {},
+  }));
+
+  const cats = await db.insert(categories).values(categoriesData).returning({
+    id: categories.id,
+    slug: categories.slug,
+  });
+  createdCategories.push(...cats);
+
+  // 3. The Big One: 1,000,000 Listings
+  const TOTAL_LISTINGS = 1_000_000;
+  const BATCH_SIZE = 2000;
+  type NewListing = typeof listings.$inferInsert;
+  const listingsBatch: NewListing[] = [];
+
+  console.log(`🚀 Generating ${TOTAL_LISTINGS.toLocaleString()} Listings...`);
+  const startTime = Date.now();
+
+  for (let i = 0; i < TOTAL_LISTINGS; i++) {
+    const name = faker.company.name();
+
+    // Pick random Location & Category ONCE
+    const loc = faker.helpers.arrayElement(createdLocations);
+    const cat = faker.helpers.arrayElement(createdCategories);
+
+    listingsBatch.push({
+      name: name,
+      slug: faker.helpers.slugify(`${name}-${i}`).toLowerCase(), // Ensure unique slug
+      description: faker.lorem.paragraph(),
+
+      // Foreign Keys (Standard Normalization)
+      locationId: loc.id,
+      categoryId: cat.id,
+
+      // Denormalized Columns (The Fix for Speed)
+      locationSlug: loc.slug,
+      categorySlug: cat.slug,
+
+      websiteUrl: faker.internet.url(),
+      rating: faker.number.int({ min: 1, max: 5 }),
+    });
+
+    // Flush batch
+    if (listingsBatch.length >= BATCH_SIZE) {
+      await db.insert(listings).values(listingsBatch);
+      listingsBatch.length = 0; // Clear array
+
+      // Progress Bar
+      if (i % 50000 === 0) {
+        const percent = ((i / TOTAL_LISTINGS) * 100).toFixed(1);
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+        process.stdout.write(
+          `\r✅ ${percent}% (${i.toLocaleString()} rows) - ${elapsed}s elapsed...`,
+        );
+      }
+    }
+  }
+
+  // Insert any leftovers
+  if (listingsBatch.length > 0) {
+    await db.insert(listings).values(listingsBatch);
+  }
+
+  console.log(
+    `\n\n🎉 DONE! 1M rows inserted in ${((Date.now() - startTime) / 1000).toFixed(2)}s`,
+  );
+  process.exit(0);
 }
 
-seed();
+main().catch((err) => {
+  console.error("\n❌ Seed Failed:", err);
+  process.exit(1);
+});

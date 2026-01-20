@@ -8,10 +8,9 @@ import {
   Mail,
   Phone,
 } from "lucide-react";
+import { CopyrightYear } from "./copyrightYear";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
     <footer className="relative bg-[#0c3937] text-teal-100/80 pt-12 pb-8 md:pt-20 md:pb-10 overflow-hidden font-sans">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -97,7 +96,9 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-teal-200/40 text-center md:text-left">
-          <p>&copy; {currentYear} Directory Inc. All rights reserved.</p>
+          <p>
+            &copy; <CopyrightYear /> Directory Inc. All rights reserved.
+          </p>
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             <Link
               href="/privacy"
