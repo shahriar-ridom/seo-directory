@@ -67,22 +67,24 @@ export function CategoryGrid({
         </h2>
 
         <div className="flex justify-center items-center gap-3">
-          <span className="text-slate-500">I&apos;m looking for pros in:</span>
+          <span className="text-slate-600 font-medium">
+            I&apos;m looking for pros in:
+          </span>
           <div className="relative group z-20">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full font-bold text-teal-700 shadow-sm hover:shadow-md transition-all">
+            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full font-bold text-teal-700 shadow-sm hover:shadow-md transition-all focus:ring-2 focus:ring-teal-500 focus:outline-none">
               <MapPin className="w-4 h-4" />
               {activeLocation.name}, {activeLocation.state}
             </button>
 
-            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white border border-slate-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-2 grid max-h-60 overflow-y-auto">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white border border-slate-100 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-2 grid max-h-60 overflow-y-auto z-50">
               {locations.map((loc) => (
                 <button
                   key={loc.id}
                   onClick={() => handleLocationChange(loc)}
                   className={`text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     activeLocation.id === loc.id
-                      ? "bg-teal-50 text-teal-700"
-                      : "text-slate-600 hover:bg-slate-50"
+                      ? "bg-teal-50 text-teal-800"
+                      : "text-slate-700 hover:bg-slate-50"
                   }`}
                 >
                   {loc.name}, {loc.state}
@@ -98,7 +100,7 @@ export function CategoryGrid({
           <Link
             key={cat.id}
             href={`/directory/${activeLocation.slug}/${cat.slug}`}
-            className="group relative bg-white p-6 rounded-3xl border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start"
+            className="group relative bg-white p-6 rounded-3xl border border-slate-100 shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-start focus:ring-4 focus:ring-teal-500/20 focus:outline-none"
           >
             <div className="w-12 h-12 rounded-2xl bg-teal-50 group-hover:bg-teal-600 flex items-center justify-center mb-4 transition-colors duration-300">
               <span className="text-xl font-bold text-teal-700 group-hover:text-white transition-colors">
@@ -108,11 +110,11 @@ export function CategoryGrid({
             <h3 className="font-bold text-slate-900 text-lg mb-1">
               {cat.name}
             </h3>
-            <p className="text-sm text-slate-500 mb-6">
+            <p className="text-sm text-slate-600 mb-6">
               Find {activeLocation.name} experts
             </p>
 
-            <div className="mt-auto flex items-center gap-2 text-sm font-bold text-teal-700 group-hover:text-amber-500 transition-colors">
+            <div className="mt-auto flex items-center gap-2 text-sm font-bold text-teal-700 group-hover:text-amber-700 transition-colors">
               View Listings <ArrowRight className="w-4 h-4" />
             </div>
           </Link>
