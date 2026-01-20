@@ -26,7 +26,9 @@ export function CategoryGrid({
       const savedSlug = localStorage.getItem("user_preferred_city");
       if (savedSlug) {
         const found = locations.find((l) => l.slug === savedSlug);
-        if (found) setActiveLocation(found);
+        if (found && found.slug !== activeLocation?.slug) {
+          setActiveLocation(found);
+        }
       }
     }
   }, [locations]);
@@ -47,7 +49,7 @@ export function CategoryGrid({
         </h2>
 
         <div className="flex justify-center items-center gap-3">
-          <span className="text-slate-500">I'm looking for pros in:</span>
+          <span className="text-slate-500">I&apos;m looking for pros in:</span>
           <div className="relative group z-20">
             <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full font-bold text-teal-700 shadow-sm hover:shadow-md transition-all">
               <MapPin className="w-4 h-4" />

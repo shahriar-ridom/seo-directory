@@ -24,12 +24,21 @@ async function main() {
   // --- Locations ---
   const locationsData = [];
   // Hardcoded + Random mix
-  const BASE_CITIES = ["Austin", "New York", "San Francisco", "Chicago", "Miami"];
+  const BASE_CITIES = [
+    "Austin",
+    "New York",
+    "San Francisco",
+    "Chicago",
+    "Miami",
+  ];
 
   for (let i = 0; i < 50; i++) {
-    const city = i < BASE_CITIES.length ? BASE_CITIES[i] : faker.location.city();
+    const city =
+      i < BASE_CITIES.length ? BASE_CITIES[i] : faker.location.city();
     // Ensure unique slug if faker duplicates a city name
-    const slug = faker.helpers.slugify(`${city}-${faker.string.alpha(3)}`).toLowerCase();
+    const slug = faker.helpers
+      .slugify(`${city}-${faker.string.alpha(3)}`)
+      .toLowerCase();
 
     locationsData.push({
       name: city,
@@ -43,18 +52,30 @@ async function main() {
   // Bulk insert locations and return IDs + Slugs (Crucial for denormalization)
   const locs = await db.insert(locations).values(locationsData).returning({
     id: locations.id,
-    slug: locations.slug
+    slug: locations.slug,
   });
   createdLocations.push(...locs);
 
   // --- Categories ---
   const SERVICES = [
-    "Coffee Shop", "Gym", "Plumber", "Dentist", "Lawyer",
-    "Bakery", "Mechanic", "Florist", "Barber", "Yoga Studio",
-    "Electrician", "HVAC", "Landscaper", "Painter", "Roofer"
+    "Coffee Shop",
+    "Gym",
+    "Plumber",
+    "Dentist",
+    "Lawyer",
+    "Bakery",
+    "Mechanic",
+    "Florist",
+    "Barber",
+    "Yoga Studio",
+    "Electrician",
+    "HVAC",
+    "Landscaper",
+    "Painter",
+    "Roofer",
   ];
 
-  const categoriesData = SERVICES.map(service => ({
+  const categoriesData = SERVICES.map((service) => ({
     name: service,
     slug: faker.helpers.slugify(service).toLowerCase(),
     templateData: {},
@@ -62,14 +83,15 @@ async function main() {
 
   const cats = await db.insert(categories).values(categoriesData).returning({
     id: categories.id,
-    slug: categories.slug
+    slug: categories.slug,
   });
   createdCategories.push(...cats);
 
   // 3. The Big One: 1,000,000 Listings
   const TOTAL_LISTINGS = 1_000_000;
-  const BATCH_SIZE = 2000; // Increased batch size slightly for speed
-  const listingsBatch: any[] = [];
+  const BATCH_SIZE = 2000;
+  type NewListing = typeof listings.$inferInsert;
+  const listingsBatch: NewListing[] = [];
 
   console.log(`🚀 Generating ${TOTAL_LISTINGS.toLocaleString()} Listings...`);
   const startTime = Date.now();
@@ -105,9 +127,11 @@ async function main() {
 
       // Progress Bar
       if (i % 50000 === 0) {
-         const percent = ((i / TOTAL_LISTINGS) * 100).toFixed(1);
-         const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
-         process.stdout.write(`\r✅ ${percent}% (${i.toLocaleString()} rows) - ${elapsed}s elapsed...`);
+        const percent = ((i / TOTAL_LISTINGS) * 100).toFixed(1);
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(0);
+        process.stdout.write(
+          `\r✅ ${percent}% (${i.toLocaleString()} rows) - ${elapsed}s elapsed...`,
+        );
       }
     }
   }
@@ -117,7 +141,9 @@ async function main() {
     await db.insert(listings).values(listingsBatch);
   }
 
-  console.log(`\n\n🎉 DONE! 1M rows inserted in ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
+  console.log(
+    `\n\n🎉 DONE! 1M rows inserted in ${((Date.now() - startTime) / 1000).toFixed(2)}s`,
+  );
   process.exit(0);
 }
 

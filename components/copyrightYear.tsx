@@ -1,15 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 export function CopyrightYear() {
-  const [year, setYear] = useState<number | null>(null);
+  const currentYear = new Date().getFullYear();
 
-  useEffect(() => {
-    setYear(new Date().getFullYear());
-  }, []);
-
-  if (!year) return null;
-
-  return <span>{year}</span>;
+  return <span suppressHydrationWarning>{currentYear}</span>;
 }

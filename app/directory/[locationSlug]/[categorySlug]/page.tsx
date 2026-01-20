@@ -7,7 +7,6 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { cacheTag } from "next/cache";
 import { Suspense } from "react";
-import { CopyrightYear } from "@/components/copyrightYear";
 
 // DATA LAYER
 async function getPageData(locSlug: string, catSlug: string) {
@@ -51,7 +50,7 @@ async function DirectoryHero({
 
   let heroText = `Best ${category.name} in ${location.name}`;
   try {
-    const tData = category.templateData as any;
+    const tData = (category.templateData as { heroText?: string }) || null;
     if (tData?.heroText) heroText = tData.heroText;
   } catch (e) {
     /* ignore */
