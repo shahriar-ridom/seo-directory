@@ -12,6 +12,8 @@ type Location = {
   state: string | null;
 };
 
+const STORAGE_KEY = "user_preferred_city";
+
 export function CategoryGrid({
   categories,
   locations,
@@ -19,24 +21,40 @@ export function CategoryGrid({
   categories: Category[];
   locations: Location[];
 }) {
-  const [activeLocation, setActiveLocation] = useState(locations[0]);
+  const [activeLocation, setActiveLocation] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const found = locations.find((l) => l.slug === saved);
+      if (found) return found;
+    }
+    return locations[0];
+  });
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedSlug = localStorage.getItem("user_preferred_city");
-      if (savedSlug) {
-        const found = locations.find((l) => l.slug === savedSlug);
-        if (found && found.slug !== activeLocation?.slug) {
-          setActiveLocation(found);
-        }
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      const found = locations.find((l) => l.slug === saved);
+      if (found) {
+        setActiveLocation(found);
       }
-    }
+    };
+
+    window.addEventListener("city-preference-changed", handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+
+    return () => {
+      window.removeEventListener(
+        "city-preference-changed",
+        handleStorageChange,
+      );
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, [locations]);
 
   const handleLocationChange = (loc: Location) => {
     setActiveLocation(loc);
 
-    localStorage.setItem("user_preferred_city", loc.slug);
+    localStorage.setItem(STORAGE_KEY, loc.slug);
 
     window.dispatchEvent(new Event("city-preference-changed"));
   };

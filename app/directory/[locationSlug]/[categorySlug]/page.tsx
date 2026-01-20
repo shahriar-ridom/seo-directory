@@ -53,7 +53,7 @@ async function DirectoryHero({
     const tData = (category.templateData as { heroText?: string }) || null;
     if (tData?.heroText) heroText = tData.heroText;
   } catch (e) {
-    /* ignore */
+    console.error(e);
   }
   heroText = heroText.replace("{city}", location.name);
 
