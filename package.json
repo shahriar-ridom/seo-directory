@@ -40,10 +40,10 @@
     "typescript": "^5"
   },
   "browserslist": [
-    "chrome >= 100",
-    "safari >= 15",
-    "ios >= 15",
-    "firefox >= 100",
-    "edge >= 100"
+    "chrome > 80",
+    "firefox > 90",
+    "safari > 14",
+    "edge > 90",
+    "not ie 11"
   ]
 }

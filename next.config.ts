@@ -6,7 +6,7 @@ const analyze = withBundleAnalyzer({
 });
 
 const nextConfig: NextConfig = {
-  // your existing config here
+  cacheComponents: true,
   reactStrictMode: true,
 };
 
